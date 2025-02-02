@@ -1,23 +1,24 @@
-import express from "express";
-import fetch from "node-fetch";
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
 
 const app = express();
+app.use(cors());
 
-app.get("/fetch", async (req, res) => {
-  const { id } = req.query;
-  if (!id) return res.status(400).send("Missing transaction ID");
-
+app.get("/proxy/:transactionId", async (req, res) => {
   try {
-    const response = await fetch(`https://apps.cbe.com.et:100/?id=${id}`);
-    if (!response.ok) throw new Error(`Failed: ${response.status}`);
+    const { transactionId } = req.params;
+    const cbeUrl = `https://apps.cbe.com.et:100/?id=${transactionId}`;
 
-    const pdf = await response.arrayBuffer();
-    res.setHeader("Content-Type", "application/pdf");
-    res.send(Buffer.from(pdf));
+    const response = await axios.get(cbeUrl, {
+      headers: { "User-Agent": "Mozilla/5.0" }, // Fake browser request
+    });
+
+    res.json({ success: true, data: response.data });
   } catch (error) {
-    res.status(500).send("Failed to fetch PDF");
+    res.status(500).json({ success: false, message: "Failed to fetch transaction.", error: error.message });
   }
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Proxy server running on port ${PORT}`));
