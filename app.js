@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 
 // Ethiopian proxy (from SPYS.ONE)
-const proxyUrl = "http://196.189.149.115:80"; // Change if needed
+const proxyUrl = "http://197.156.100.177:53281"; // Change if needed
 const agent = new HttpsProxyAgent(proxyUrl);
 
 app.get("/proxy/:transactionId", async (req, res) => {
